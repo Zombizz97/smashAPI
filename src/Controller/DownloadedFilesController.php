@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\DownloadedFiles;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use OpenApi\Attributes as OA;
 
 class DownloadedFilesController extends AbstractController
 {
@@ -23,35 +25,72 @@ class DownloadedFilesController extends AbstractController
         ]);
     }
 
-    #[Route('/api/files', name: 'files.create', methods: ['POST'])]
+    /**
+     * Méthode permettant d'enregister une image
+     */
+    #[Route('/api/files', name: 'file.create', methods:["POST"])]
+    #[OA\Response(
+        response: 201,
+        description: "Récupère l'image enregistée",
+        content: new OA\MediaType(
+            mediaType: "image",
+            schema: new OA\Schema(
+                type: "string",
+                format: "binary"
+            )
+        ),
+    )]
+    #[OA\Parameter(
+        name: 'file',
+        description: 'Image à enregister',
+        schema: new OA\Schema(type: 'file')
+    )]
+    #[OA\Tag(name:'File')]
     public function createDownloadedFile(
-        Request $request,
+        Request $request, 
         EntityManagerInterface $entityManager,
-        SerializerInterface $serializer,
-        UrlGeneratorInterface $urlGenerator): JsonResponse
+       SerializerInterface $serializer, 
+       UrlGeneratorInterface $urlGenerator 
+    ): JsonResponse
     {
         $downloadFile = new DownloadedFiles();
         $file = $request->files->get('file');
-
+        
         $downloadFile->setFile($file);
         $downloadFile->setMimeType($file->getClientMimeType());
         $downloadFile->setRealName($file->getClientOriginalName());
         $downloadFile->setName($file->getClientOriginalName());
-        $downloadFile->setPublicPath("/public/media/pictures");
-        $downloadFile->setUpdatedAt(new \DateTime());
-        $downloadFile->setCreatedAt(new \DateTime());
-        $downloadFile->setStatus("on");
+        $downloadFile->setPublicPath("/public/medias/pictures");
+        $downloadFile->setUpdatedAt(new \DateTime())
+        ->setCreatedAt(new \DateTime())->setStatus("on");
 
         $entityManager->persist($downloadFile);
-        $entityManager->flush();
-        
-        $jsonFiles = $serializer->serialize($downloadFile,'json');
-        $location = $urlGenerator->generate('file.get', ["downloadedFiles" => $downloadFile->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $entityManager->flush( );
 
-        return new JsonResponse($jsonFiles, Response::HTTP_CREATED, ["Location" => $location], true);
+        $jsonFiles = $serializer->serialize($downloadFile, 'json');
+        $location = $urlGenerator->generate('file.get', ["downloadedFiles" => $downloadFile->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        dd($location);
+
+        return new JsonResponse($jsonFiles, JsonResponse::HTTP_CREATED, ["Location" => $location], true);
+    
     }
 
-    #[Route('/api/files/{id}', name: 'files.get', methods: ['GET'])]
+    /**
+     * Méthode permettant de récupérer une image grâce à son ID
+     */
+    #[Route('/api/files/{downloadedFiles}', name: 'file.get', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: "Récupère une image avec son ID",
+        content: new OA\MediaType(
+            mediaType: "image",
+            schema: new OA\Schema(
+                type: "string",
+                format: "binary"
+            )
+        ),
+    )]
+    #[OA\Tag(name:'File')]
     public function getDownloadedFile(
         DownloadedFiles $downloadedFile,
         SerializerInterface $serializer,

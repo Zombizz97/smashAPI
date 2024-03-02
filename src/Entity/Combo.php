@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ComboRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ComboRepository::class)]
 class Combo
@@ -12,18 +13,22 @@ class Combo
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['getAllCombo'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 24)]
+    #[Groups(['getAllCombo'])]
     private ?string $name = null;
 
     #[ORM\ManyToOne(inversedBy: 'combos')]
     private ?Character $main = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['getAllCombo'])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['getAllCombo'])]
     private ?\DateTimeInterface $updated_at = null;
 
     public function getId(): ?int

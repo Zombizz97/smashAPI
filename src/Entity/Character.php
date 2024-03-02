@@ -16,19 +16,19 @@ class Character
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['getAllCharacters'])]
+    #[Groups(['getAllCharacter'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 24)]
-    #[Groups(['getAllCharacters'])]
+    #[Groups(['getAllCharacter'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['getAllCharacters'])]
+    #[Groups(['getAllCharacter'])]
     private ?\DateTimeInterface $created_at = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['getAllCharacters'])]
+    #[Groups(['getAllCharacter'])]
     private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\OneToMany(mappedBy: 'main', targetEntity: User::class)]

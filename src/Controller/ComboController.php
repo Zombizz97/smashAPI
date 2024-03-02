@@ -2,20 +2,21 @@
 
 namespace App\Controller;
 
+use App\Entity\Character;
 use App\Entity\Combo;
+use App\Repository\CharacterRepository;
 use App\Repository\ComboRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use OpenApi\Attributes as OA;
 
 class ComboController extends AbstractController
 {
@@ -28,26 +29,89 @@ class ComboController extends AbstractController
         ]);
     }
 
+    /**
+     * Méthode permettant de récupérer tous les combos.
+     */
     #[Route('/api/combo', name:"combo.getAll", methods:["GET"])]
+    #[OA\Response(
+        response: 200,
+        description: "Récupère l'ensemble des combo",
+        content: new OA\JsonContent(
+            ref: new Model(
+                type: Combo::class,
+                groups: ["getAllCombo"]
+            )
+        ),
+    )]
+    #[OA\Tag(name:'Combo')]
     public function getAllCombos(ComboRepository $repository, SerializerInterface $serializer){
         $combos = $repository->findAll();
-        $jsonCombos = $serializer->serialize($combos, 'json',['groups' => "getAllCombos"]);
+        $jsonCombos = $serializer->serialize($combos, 'json',['groups' => "getAllCombo"]);
         return new JsonResponse($jsonCombos, JsonResponse::HTTP_OK, [], true);
     }
-        
+    
+    /**
+     * Méthode permettant de récupérer un combo grâce à son ID
+     */
     #[Route('/api/combo/{combo}', name:"combo.get", methods:["GET"])]
+    #[OA\Response(
+        response: 200,
+        description: "Récupère un combo avec son ID",
+        content: new OA\JsonContent(
+            ref: new Model(
+                type: Combo::class,
+                groups: ["getAllCombo"]
+            )
+        ),
+    )]
+    #[OA\Tag(name:'Combo')]
     public function getCombo(Combo $combo, SerializerInterface $serializer){
-        $jsonCombos = $serializer->serialize($combo, 'json',['groups' => "getAllCombos"]);
-        return new JsonResponse($jsonCombos, JsonResponse::HTTP_OK, [], true);
+        $jsonCombo = $serializer->serialize($combo, 'json',['groups' => "getAllCombo"]);
+        return new JsonResponse($jsonCombo, JsonResponse::HTTP_OK, [], true);
     }
 
+    /**
+     * Méthode permettant de créer un combo
+     */
     #[Route('/api/combo', name:"combo.create", methods:["POST"])]
-    public function createCombo(Request $request, ValidatorInterface $validator,UrlGeneratorInterface $urlGenerator,  SerializerInterface $serializer, EntityManagerInterface $manager){
-    $date = new \DateTime();
-    $combo = $serializer->deserialize($request->getContent(), Combo::class,'json');
-    $combo
-        ->setCreatedAt($date)
-        ->setUpdatedAt($date);
+    #[OA\Response(
+        response: 201,
+        description: "Récupère le combo créé",
+        content: new OA\JsonContent(
+            ref: new Model(
+                type: Combo::class,
+                groups: ["getAllCombo"]
+            )
+        ),
+    )]
+    #[OA\Parameter(
+        name: 'name',
+        description: 'Nom du combo',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Parameter(
+        name: 'main',
+        description: 'Personnage lié au combo',
+        schema: new OA\Schema(type: Character::class)
+    )]
+    #[OA\Tag(name:'Combo')]
+    public function createCombo(
+        Request $request,
+        ValidatorInterface $validator,
+        UrlGeneratorInterface $urlGenerator,
+        SerializerInterface $serializer,
+        EntityManagerInterface $manager,
+        CharacterRepository $repository){
+        $date = new \DateTime();
+        $combo = $serializer->deserialize($request->getContent(), Combo::class,'json');
+        $main = $request->toArray();
+        if (isset($main['main'])) {
+            $character = $repository->findOneBy(['id'=> $main['main'][0]]);
+            $combo->setMain($character);
+        }
+        $combo
+            ->setCreatedAt($date)
+            ->setUpdatedAt($date);
        
         $errors = $validator->validate($combo);
         if($errors->count() > 0 ){
@@ -56,13 +120,31 @@ class ComboController extends AbstractController
         $manager->persist($combo);
         $manager->flush();
        
-        $jsonCombos = $serializer->serialize($combo, 'json',['groups' => "getAllCombos"]);
+        $jsonCombos = $serializer->serialize($combo, 'json',['groups' => "getAllCombo"]);
         $location = $urlGenerator->generate("combo.get", ["combo" => $combo->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         return new JsonResponse($jsonCombos, JsonResponse::HTTP_CREATED, ["Location" => $location], true);
     }
 
-            #[Route('/api/combo/{combo}', name:"combo.update", methods:["PUT"])]
-    public function updateCombo(Combo $combo,Request $request,  SerializerInterface $serializer, EntityManagerInterface $manager){
+    /**
+     * Méthode permettant de mettre à jour un combo
+     */
+    #[Route('/api/combo/{combo}', name:"combo.update", methods:["PUT"])]
+    #[OA\Response(
+        response: 204,
+        description: "Mets à jour le combo"
+    )]
+    #[OA\Parameter(
+        name: 'main',
+        description: 'Personnage lié au combo',
+        schema: new OA\Schema(type: Character::class)
+    )]
+    #[OA\Tag(name:'Combo')]
+    public function updateCombo(
+        Combo $combo,
+        Request $request, 
+        SerializerInterface $serializer,
+        EntityManagerInterface $manager,
+        CharacterRepository $repository){
         $date = new \DateTime();
         
         $updatedCombo = $serializer->deserialize($request->getContent(), 
@@ -70,6 +152,11 @@ class ComboController extends AbstractController
             'json',
             [AbstractNormalizer::OBJECT_TO_POPULATE => $combo]
         );
+        $main = $request->toArray();
+        if (isset($main['main'])) {
+            $character = $repository->findOneBy(['id'=> $main['main'][0]]);
+            $updatedCombo->setMain($character);
+        }
         $updatedCombo
         ->setUpdatedAt($date);
         $manager->persist($updatedCombo);
@@ -78,7 +165,15 @@ class ComboController extends AbstractController
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
+    /**
+     * Méthode permettant de supprimer un combo
+     */
     #[Route('/api/combo/{combo}', name:"combo.delete", methods:["DELETE"])]
+    #[OA\Response(
+        response: 204,
+        description: "Supprime le combo"
+    )]
+    #[OA\Tag(name:'Combo')]
     public function deleteCombo(Combo $combo, EntityManagerInterface $manager){
         $manager->remove($combo);
         $manager->flush();
