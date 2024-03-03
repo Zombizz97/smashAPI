@@ -19,7 +19,7 @@ class Character
     #[Groups(['getAllCharacter'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 24)]
+    #[ORM\Column(length: 48)]
     #[Groups(['getAllCharacter'])]
     private ?string $name = null;
 
@@ -124,28 +124,6 @@ class Character
     public function getCombos(): Collection
     {
         return $this->combos;
-    }
-
-    public function addCombo(Combo $combo): static
-    {
-        if (!$this->combos->contains($combo)) {
-            $this->combos->add($combo);
-            $combo->setMain($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCombo(Combo $combo): static
-    {
-        if ($this->combos->removeElement($combo)) {
-            // set the owning side to null (unless already changed)
-            if ($combo->getMain() === $this) {
-                $combo->setMain(null);
-            }
-        }
-
-        return $this;
     }
 
     /**

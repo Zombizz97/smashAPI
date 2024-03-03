@@ -20,9 +20,6 @@ class Combo
     #[Groups(['getAllCombo'])]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'combos')]
-    private ?Character $main = null;
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['getAllCombo'])]
     private ?\DateTimeInterface $created_at = null;
@@ -44,18 +41,6 @@ class Combo
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getMain(): ?Character
-    {
-        return $this->main;
-    }
-
-    public function setMain(?Character $main): static
-    {
-        $this->main = $main;
 
         return $this;
     }

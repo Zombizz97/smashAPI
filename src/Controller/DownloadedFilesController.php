@@ -92,16 +92,16 @@ class DownloadedFilesController extends AbstractController
     )]
     #[OA\Tag(name:'File')]
     public function getDownloadedFile(
-        DownloadedFiles $downloadedFile,
+        DownloadedFiles $downloadedFiles,
         SerializerInterface $serializer,
         UrlGeneratorInterface $urlGenerator): JsonResponse
     {
-        $publicPath = $downloadedFile->getPublicPath();
+        $publicPath = $downloadedFiles->getPublicPath();
         $location = $urlGenerator->generate('app_downloaded_files', [], UrlGeneratorInterface::ABSOLUTE_URL);
-        $location = $location . str_replace("/public/", "", $publicPath . "/" . $downloadedFile->getRealPath());
-        $jsonFiles = $serializer->serialize($downloadedFile,'json');
+        $location = $location . str_replace("/public/", "", $publicPath . "/" . $downloadedFiles->getRealPath());
+        $jsonFiles = $serializer->serialize($downloadedFiles,'json');
 
-        return $downloadedFile ? new JsonResponse($jsonFiles, Response::HTTP_OK, ["Location" => $location], true) :
-        new JsonResponse(null, Response::HTTP_NOT_FOUND);
+        return $downloadedFiles ? new JsonResponse($jsonFiles, Response::HTTP_OK, ["Location" => $location], true) :
+            new JsonResponse(null, Response::HTTP_NOT_FOUND);
     }
 }

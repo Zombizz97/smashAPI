@@ -22,6 +22,9 @@ class Order
     #[ORM\ManyToMany(targetEntity: Payload::class, inversedBy: 'orders')]
     private Collection $payload;
 
+    #[ORM\Column(length: 24)]
+    private ?string $type = null;
+
     public function __construct()
     {
         $this->payload = new ArrayCollection();
@@ -64,6 +67,18 @@ class Order
     public function removePayload(Payload $payload): static
     {
         $this->payload->removeElement($payload);
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

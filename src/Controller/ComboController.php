@@ -2,9 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Character;
 use App\Entity\Combo;
-use App\Repository\CharacterRepository;
 use App\Repository\ComboRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -89,26 +87,15 @@ class ComboController extends AbstractController
         description: 'Nom du combo',
         schema: new OA\Schema(type: 'string')
     )]
-    #[OA\Parameter(
-        name: 'main',
-        description: 'Personnage lié au combo',
-        schema: new OA\Schema(type: Character::class)
-    )]
     #[OA\Tag(name:'Combo')]
     public function createCombo(
         Request $request,
         ValidatorInterface $validator,
         UrlGeneratorInterface $urlGenerator,
         SerializerInterface $serializer,
-        EntityManagerInterface $manager,
-        CharacterRepository $repository){
+        EntityManagerInterface $manager){
         $date = new \DateTime();
         $combo = $serializer->deserialize($request->getContent(), Combo::class,'json');
-        $main = $request->toArray();
-        if (isset($main['main'])) {
-            $character = $repository->findOneBy(['id'=> $main['main'][0]]);
-            $combo->setMain($character);
-        }
         $combo
             ->setCreatedAt($date)
             ->setUpdatedAt($date);
@@ -133,18 +120,12 @@ class ComboController extends AbstractController
         response: 204,
         description: "Mets à jour le combo"
     )]
-    #[OA\Parameter(
-        name: 'main',
-        description: 'Personnage lié au combo',
-        schema: new OA\Schema(type: Character::class)
-    )]
     #[OA\Tag(name:'Combo')]
     public function updateCombo(
         Combo $combo,
         Request $request, 
         SerializerInterface $serializer,
-        EntityManagerInterface $manager,
-        CharacterRepository $repository){
+        EntityManagerInterface $manager){
         $date = new \DateTime();
         
         $updatedCombo = $serializer->deserialize($request->getContent(), 
@@ -152,11 +133,6 @@ class ComboController extends AbstractController
             'json',
             [AbstractNormalizer::OBJECT_TO_POPULATE => $combo]
         );
-        $main = $request->toArray();
-        if (isset($main['main'])) {
-            $character = $repository->findOneBy(['id'=> $main['main'][0]]);
-            $updatedCombo->setMain($character);
-        }
         $updatedCombo
         ->setUpdatedAt($date);
         $manager->persist($updatedCombo);

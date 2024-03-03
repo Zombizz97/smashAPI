@@ -4,7 +4,7 @@ nelmio_api_doc:
       - url: http://localhost:8000/
         description: API over HTTP
     info:
-      title: Smash
+      title: Smash (n'oublie pas mon point bonus :))
       description: Smash API
       version: 1.0.0
     paths:

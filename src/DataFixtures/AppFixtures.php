@@ -5,13 +5,18 @@ namespace App\DataFixtures;
 use App\Entity\Character;
 use App\Entity\Combo;
 use App\Entity\Input;
+use App\Entity\Order;
+use App\Entity\PayloadType;
 use App\Entity\ProPlayer;
 use App\Entity\User;
+use App\Repository\ComboRepository;
+use App\Repository\InputRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Validator\Constraints\Length;
 
 class AppFixtures extends Fixture
 {
@@ -26,24 +31,41 @@ class AppFixtures extends Fixture
      */
     private UserPasswordHasherInterface $userPasswordHasher;
 
-    public function __construct(UserPasswordHasherInterface $userPasswordHasher){
+    public function __construct(UserPasswordHasherInterface $userPasswordHasher, ComboRepository $comboRepository, InputRepository $inputRepository){
         $this->faker = Factory::create("fr_FR");
         $this->userPasswordHasher = $userPasswordHasher;
     }
     public function load(ObjectManager $manager): void
     {
+        $comboList = [
+            "Up Tilt",
+            "Up Air",
+            "Up Smash",
+            "Back Air",
+            "Up B",
+        ];
+        $inputList = [
+            "Haut",
+            "Avant",
+            "Arrière",
+            "A",
+            "B",
+            "Saut",
+            "C Stick Haut"
+        ];
+        $proPlayerList = [
+            "Kurama",
+            "Dark Wizzy",
+            "Nao"
+        ];
         $date = new \DateTime();
 
         // Character
-        $characters = [];
-        for ($i = 0; $i < 10; $i++) {
-            $character = new Character();
-            $character->setName($this->faker->name())
-                ->setCreatedAt($date)
-                ->setUpdatedAt($date);
-            $manager->persist($character);
-            $characters[] = $character;
-        }
+        $character = new Character();
+        $character->setName("Mario")
+            ->setCreatedAt($date)
+            ->setUpdatedAt($date);
+        $manager->persist($character);
 
         //Public user
         $publicUser = new User();
@@ -55,23 +77,21 @@ class AppFixtures extends Fixture
             ->setCreatedAt($date)
             ->setUpdatedAt($date)
             ->setStatus("on")
-            ->setMain($characters[array_rand($characters,1)]);
+            ->setMain($character);
         $manager->persist($publicUser);
 
         // User
-        for ($i = 0; $i < 10; $i++) {
-            $userUser = new User();
-            $password = $this->faker->password(2,6);
-            $userUser
-                ->setUuid($this->faker->name() . "@" . $password)
-                ->setPassword($this->userPasswordHasher->hashPassword($userUser, $password))
-                ->setRoles(["ROLE_USER"])
-                ->setCreatedAt($date)
-                ->setUpdatedAt($date)
-                ->setStatus("on")
-                ->setMain($characters[array_rand($characters,1)]);
-            $manager->persist($userUser);
-        }
+        $userUser = new User();
+        $password = $this->faker->password(2,6);
+        $userUser
+            ->setUuid($this->faker->name() . "@" . $password)
+            ->setPassword($this->userPasswordHasher->hashPassword($userUser, $password))
+            ->setRoles(["ROLE_USER"])
+            ->setCreatedAt($date)
+            ->setUpdatedAt($date)
+            ->setStatus("on")
+            ->setMain($character);
+        $manager->persist($userUser);
         // Admin user
         $adminUser = new User();
         $adminUser
@@ -81,37 +101,133 @@ class AppFixtures extends Fixture
             ->setCreatedAt($date)
             ->setUpdatedAt($date)
             ->setStatus("on")
-            ->setMain($characters[array_rand($characters,1)]);
+            ->setMain($character);
         $manager->persist($adminUser);
 
         // Combo
-        for ($i = 0; $i < 10; $i++) {
+        $combos = [];
+        for ($i = 0; $i < count($comboList); $i++) {
             $combo = new Combo();
-            $combo->setName($this->faker->name())
-                ->setMain($characters[array_rand($characters,1)])
+            $combo->setName($comboList[$i])
                 ->setCreatedAt($date)
                 ->setUpdatedAt($date);
-            $manager->persist($combo);    
+            $manager->persist($combo);
+            $combos[] = $combo;    
         }
 
         // Input
-        for ($i = 0; $i < 10; $i++) {
+        $inputs = [];
+        for ($i = 0; $i < count($inputList); $i++) {
             $input = new Input();
-            $input->setInput($this->faker->text(10))
+            $input->setInput($inputList[$i])
                 ->setCreatedAt($date)
                 ->setUpdatedAt($date);
             $manager->persist($input);
+            $inputs[] = $input;
         }
 
         // ProPlayer
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < count($proPlayerList); $i++) {
             $proPlayer = new ProPlayer();
-            $proPlayer->setName($this->faker->name())
-                ->setMain($characters[array_rand($characters,1)])
+            $proPlayer->setName($proPlayerList[$i])
+                ->setMain($character)
                 ->setCreatedAt($date)
                 ->setUpdatedAt($date);
             $manager->persist($proPlayer);
         }
+
+        // Payload_type
+        $payloadType = new PayloadType();
+        $payloadType->setType("combo")
+            ->setCreatedAt(new \DateTime())
+            ->setUpdatedAt(new \DateTime());
+        $manager->persist($payloadType);
+        $payloadType = new PayloadType();
+        $payloadType->setType("input")
+            ->setCreatedAt(new \DateTime())
+            ->setUpdatedAt(new \DateTime());
+        $manager->persist($payloadType);
+
+        $manager->flush();
+
+        // Order
+        $order = new Order();
+        $order->setSequence($combos[2]->getId())
+            ->setType("combo");
+        $manager->persist($order);
+
+        $order = new Order();
+        $order->setSequence($inputs[0]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[3]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($combos[0]->getId())
+            ->setType("combo");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[6]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[5]->getId())
+            ->setType("inputInCombo");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($combos[1]->getId())
+            ->setType("combo");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[0]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[3]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($combos[1]->getId())
+            ->setType("combo");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[0]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[3]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($combos[4]->getId())
+            ->setType("combo");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[0]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[4]->getId())
+            ->setType("input");
+        $manager->persist($order);
+        
+        // Payload
+        
 
         $manager->flush();
     }
