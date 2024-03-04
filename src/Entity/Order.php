@@ -3,9 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -14,13 +13,20 @@ class Order
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['getAllOrder'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['getAllOrder'])]
     private ?int $sequence = null;
 
     #[ORM\Column(length: 24)]
+    #[Groups(['getAllOrder'])]
     private ?string $type = null;
+
+    #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Character $main = null;
 
     public function getId(): ?int
     {
@@ -49,5 +55,23 @@ class Order
         $this->type = $type;
 
         return $this;
+    }
+
+    public function getMain(): ?Character
+    {
+        return $this->main;
+    }
+
+    public function setMain(?Character $main): static
+    {
+        $this->main = $main;
+
+        return $this;
+    }
+
+    #[Groups(['getAllOrder'])]
+    public function getCharacterName(): ?string
+    {
+        return $this->main ? $this->main->getName() : null;
     }
 }

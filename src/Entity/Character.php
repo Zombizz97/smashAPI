@@ -40,11 +40,15 @@ class Character
     #[ORM\OneToMany(mappedBy: 'main', targetEntity: ProPlayer::class)]
     private Collection $proPlayers;
 
+    #[ORM\OneToMany(mappedBy: 'main', targetEntity: Order::class)]
+    private Collection $orders;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->combos = new ArrayCollection();
         $this->proPlayers = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -150,6 +154,36 @@ class Character
             // set the owning side to null (unless already changed)
             if ($proPlayer->getMain() === $this) {
                 $proPlayer->setMain(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): static
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->setMain($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): static
+    {
+        if ($this->orders->removeElement($order)) {
+            // set the owning side to null (unless already changed)
+            if ($order->getMain() === $this) {
+                $order->setMain(null);
             }
         }
 

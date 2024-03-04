@@ -2,14 +2,17 @@
 
 namespace App\Controller;
 
+use App\Entity\Order;
 use App\Repository\ComboRepository;
 use App\Repository\InputRepository;
 use App\Repository\OrderRepository;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use OpenApi\Attributes as OA;
 
 class OrderController extends AbstractController
 {
@@ -21,18 +24,44 @@ class OrderController extends AbstractController
         ]);
     }
 
+    /**
+     * Méthode permettant de récupérer toutes les données de la table order
+     */
     #[Route('/api/order', name:'order.getAll', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: "Récupère toutes les données de la table order",
+        content: new OA\JsonContent(
+            ref: new Model(
+                type: Order::class
+            )
+        ),
+    )]
+    #[OA\Tag(name:'Order')]
     public function getAll(OrderRepository $repository, SerializerInterface $serializer)
     {
         $orders = $repository->findAll();
-        $jsonOrders = $serializer->serialize($orders, 'json');
+
+
+        $jsonOrders = $serializer->serialize($orders, 'json', ['groups' => "getAllOrder"]);
         return new JsonResponse($jsonOrders, JsonResponse::HTTP_OK, [], true);
     }
-
-    #[Route('/api/order/combo', name:'order.getCombo', methods: ['GET'])]
-    public function getCombo(OrderRepository $repository, SerializerInterface $serializer, ComboRepository $comboRepository, InputRepository $inputRepository)
+    
+    /**
+     * Méthode permettant de récupérer les combo grâce à l'id du character
+     */
+    #[Route('/api/order/combo/{idMain}', name:'order.getCombo', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: "Récupère les combos d'un personnage",
+        content: new OA\JsonContent(
+            ref: 'string'
+        ),
+    )]
+    #[OA\Tag(name:'Order')]
+    public function getCombo(OrderRepository $repository, ComboRepository $comboRepository, InputRepository $inputRepository, int $idMain)
     {
-        $orders = $repository->findAll();
+        $orders = $repository->findBy(['main'=> $idMain]);
         $response = [];
         $currentCombo = null;
         foreach ($orders as $i => $order) {
@@ -72,8 +101,3 @@ class OrderController extends AbstractController
         return new JsonResponse($formattedResponse, JsonResponse::HTTP_OK);
     }
 }
-
-// if ($order->getType() == "inputInCombo") {
-//     $input = $inputRepository->find($order->getSequence());
-//     $response[] = $input->getInput();
-// } else 
