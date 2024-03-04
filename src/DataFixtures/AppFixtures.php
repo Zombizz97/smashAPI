@@ -16,7 +16,6 @@ use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 use Faker\Generator;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Validator\Constraints\Length;
 
 class AppFixtures extends Fixture
 {
@@ -136,18 +135,6 @@ class AppFixtures extends Fixture
             $manager->persist($proPlayer);
         }
 
-        // Payload_type
-        $payloadType = new PayloadType();
-        $payloadType->setType("combo")
-            ->setCreatedAt(new \DateTime())
-            ->setUpdatedAt(new \DateTime());
-        $manager->persist($payloadType);
-        $payloadType = new PayloadType();
-        $payloadType->setType("input")
-            ->setCreatedAt(new \DateTime())
-            ->setUpdatedAt(new \DateTime());
-        $manager->persist($payloadType);
-
         $manager->flush();
 
         // Order
@@ -226,9 +213,6 @@ class AppFixtures extends Fixture
             ->setType("input");
         $manager->persist($order);
         
-        // Payload
-        
-
         $manager->flush();
     }
 }

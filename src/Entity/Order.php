@@ -19,16 +19,8 @@ class Order
     #[ORM\Column]
     private ?int $sequence = null;
 
-    #[ORM\ManyToMany(targetEntity: Payload::class, inversedBy: 'orders')]
-    private Collection $payload;
-
     #[ORM\Column(length: 24)]
     private ?string $type = null;
-
-    public function __construct()
-    {
-        $this->payload = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -43,30 +35,6 @@ class Order
     public function setSequence(int $sequence): static
     {
         $this->sequence = $sequence;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Payload>
-     */
-    public function getPayload(): Collection
-    {
-        return $this->payload;
-    }
-
-    public function addPayload(Payload $payload): static
-    {
-        if (!$this->payload->contains($payload)) {
-            $this->payload->add($payload);
-        }
-
-        return $this;
-    }
-
-    public function removePayload(Payload $payload): static
-    {
-        $this->payload->removeElement($payload);
 
         return $this;
     }

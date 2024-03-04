@@ -36,16 +36,29 @@ class OrderController extends AbstractController
         $response = [];
         $currentCombo = null;
         foreach ($orders as $i => $order) {
-            if ($order->getType() == "combo") {
+            if ($order->getType() == "inputInCombo") {
+                if ($currentCombo !== null) {
+                    $response[] = rtrim($currentCombo, " +") . ")";
+                    $currentCombo = null;
+                }
+                $input = $inputRepository->find($order->getSequence());
+                $response[] = $input->getInput();
+            } else if ($order->getType() == "comboStarter") {
                 if ($currentCombo !== null) {
                     $response[] = rtrim($currentCombo, " +") . ")";
                 }
                 $combo = $comboRepository->find($order->getSequence());
                 $currentCombo = $combo->getName() . " (";
-            } else if ($order->getType() == "input" && $currentCombo !== null) {
+            } else if ($order->getType() == "combo" || $order->getType() == "comboStarter") {
+                if ($currentCombo !== null) {
+                    $response[] = rtrim($currentCombo, " +") . ")";
+                }
+                $combo = $comboRepository->find($order->getSequence());
+                $currentCombo = $combo->getName() . " (";
+            } else if ($order->getType() == "input") {
                 $input = $inputRepository->find($order->getSequence());
-                if ($i > 0 && $orders[$i - 1]->getType() == "combo") {
-                    $currentCombo .= $input->getInput();
+                if ($i > 0 && ($orders[$i - 1]->getType() == "combo" || $orders[$i - 1]->getType() == "comboStarter")) {
+                    $currentCombo .= " " . $input->getInput();
                 } else {
                     $currentCombo .= " + " . $input->getInput();
                 }
@@ -59,3 +72,8 @@ class OrderController extends AbstractController
         return new JsonResponse($formattedResponse, JsonResponse::HTTP_OK);
     }
 }
+
+// if ($order->getType() == "inputInCombo") {
+//     $input = $inputRepository->find($order->getSequence());
+//     $response[] = $input->getInput();
+// } else 
