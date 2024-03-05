@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class OrderController extends AbstractController
 {
@@ -77,7 +78,7 @@ class OrderController extends AbstractController
                     $response[] = rtrim($currentCombo, " +") . ")";
                 }
                 $combo = $comboRepository->find($order->getSequence());
-                $currentCombo = $combo->getName() . " (";
+                $currentCombo = ";" . $combo->getName() . " (";
             } else if ($order->getType() == "combo" || $order->getType() == "comboStarter") {
                 if ($currentCombo !== null) {
                     $response[] = rtrim($currentCombo, " +") . ")";
@@ -98,6 +99,9 @@ class OrderController extends AbstractController
         }
         
         $formattedResponse = implode(" / ", $response);
+        $formattedResponse = explode(";", $formattedResponse);
+        array_shift( $formattedResponse );
+
         return new JsonResponse($formattedResponse, JsonResponse::HTTP_OK);
     }
 }
