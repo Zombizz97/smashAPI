@@ -16,6 +16,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use OpenApi\Attributes as OA;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class ProPlayerController extends AbstractController
 {
@@ -43,9 +45,15 @@ class ProPlayerController extends AbstractController
         ),
     )]
     #[OA\Tag(name:'Joueur Pro')]
-    public function getAllProPlayers(ProPlayerRepository $repository, SerializerInterface $serializer){
-        $proPlayers = $repository->findAll();
-        $jsonProPlayers = $serializer->serialize($proPlayers, 'json', ['groups' => "getAllProPlayer"]);
+    public function getAllProPlayers(ProPlayerRepository $repository, SerializerInterface $serializer, TagAwareCacheInterface $cache){
+        $idCache = "getAllProPlayerCache";
+
+        $jsonProPlayers = $cache->get($idCache, function (ItemInterface $item) use ($repository, $serializer) {
+            $item->tag("proPlayerCache");
+            $proPlayers = $repository->findAll();
+            return $serializer->serialize($proPlayers, 'json',['groups' => "getAllProPlayer"]);
+        });
+
         return new JsonResponse($jsonProPlayers, JsonResponse::HTTP_OK, [], true);
     }
         

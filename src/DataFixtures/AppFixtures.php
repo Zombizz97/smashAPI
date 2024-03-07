@@ -58,12 +58,22 @@ class AppFixtures extends Fixture
             "Nao"
         ];
         $date = new \DateTime();
+        $characters = [];
+
+        // Character
+        $character = new Character();
+        $character->setName("Donkey Kong")
+            ->setCreatedAt($date)
+            ->setUpdatedAt($date);
+        $characters[] = $character;
+        $manager->persist($character);
 
         // Character
         $character = new Character();
         $character->setName("Mario")
             ->setCreatedAt($date)
             ->setUpdatedAt($date);
+        $characters[] = $character;
         $manager->persist($character);
 
         //Public user
@@ -140,92 +150,202 @@ class AppFixtures extends Fixture
         // Order
         $order = new Order();
         $order->setSequence($combos[2]->getId())
-            ->setType("combo")
-            ->setMain($character);
+            ->setType("comboStarter")
+            ->setMain($characters[0]);
         $manager->persist($order);
 
         $order = new Order();
         $order->setSequence($inputs[0]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[3]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($combos[0]->getId())
             ->setType("combo")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[6]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[5]->getId())
             ->setType("inputInCombo")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($combos[1]->getId())
             ->setType("combo")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[0]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[3]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($combos[1]->getId())
             ->setType("combo")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[0]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[3]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($combos[4]->getId())
             ->setType("combo")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[0]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
         $manager->persist($order);
         
         $order = new Order();
         $order->setSequence($inputs[4]->getId())
             ->setType("input")
-            ->setMain($character);
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        // New combo
+        $order = new Order();
+        $order->setSequence($combos[0]->getId())
+            ->setType("comboStarter")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[6]->getId())
+            ->setType("input")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[5]->getId())
+            ->setType("inputInCombo")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($combos[1]->getId())
+            ->setType("combo")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[0]->getId())
+            ->setType("input")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[3]->getId())
+            ->setType("input")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($combos[4]->getId())
+            ->setType("combo")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[0]->getId())
+            ->setType("input")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[4]->getId())
+            ->setType("input")
+            ->setMain($characters[0]);
+        $manager->persist($order);
+        
+        // New combo
+        $order = new Order();
+        $order->setSequence($combos[0]->getId())
+            ->setType("comboStarter")
+            ->setMain($characters[1]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[6]->getId())
+            ->setType("input")
+            ->setMain($characters[1]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[5]->getId())
+            ->setType("inputInCombo")
+            ->setMain($characters[1]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($combos[1]->getId())
+            ->setType("combo")
+            ->setMain($characters[1]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[0]->getId())
+            ->setType("input")
+            ->setMain($characters[1]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[3]->getId())
+            ->setType("input")
+            ->setMain($characters[1]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($combos[4]->getId())
+            ->setType("combo")
+            ->setMain($characters[1]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[0]->getId())
+            ->setType("input")
+            ->setMain($characters[1]);
+        $manager->persist($order);
+        
+        $order = new Order();
+        $order->setSequence($inputs[4]->getId())
+            ->setType("input")
+            ->setMain($characters[1]);
         $manager->persist($order);
         
         $manager->flush();

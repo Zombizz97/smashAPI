@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use OpenApi\Attributes as OA;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class OrderController extends AbstractController
 {
@@ -60,7 +59,11 @@ class OrderController extends AbstractController
         ),
     )]
     #[OA\Tag(name:'Order')]
-    public function getCombo(OrderRepository $repository, ComboRepository $comboRepository, InputRepository $inputRepository, int $idMain)
+    public function getCombo(
+        OrderRepository $repository,
+        ComboRepository $comboRepository,
+        InputRepository $inputRepository,
+        int $idMain)
     {
         $orders = $repository->findBy(['main'=> $idMain]);
         $response = [];
